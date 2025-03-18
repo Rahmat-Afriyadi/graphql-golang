@@ -1,0 +1,43 @@
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  password: String!
+}
+
+type Product {
+  id: ID!
+  name: String!
+  price: Float!
+  stock: Int!
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+type Query {
+  # User Queries
+  getUser(id: ID!): User
+  getAllUsers: [User!]!
+  me: User! # Mendapatkan informasi user yang sedang login
+  # Product Queries
+  getProduct(id: ID!): Product
+  getAllProducts: [Product!]!
+}
+
+type Mutation {
+  # Authentication Mutations
+  register(name: String!, email: String!, password: String!): AuthPayload!
+  login(email: String!, password: String!): AuthPayload!
+
+  # User Mutations
+  updateUser(id: ID!, name: String, email: String): User!
+  deleteUser(id: ID!): Boolean!
+
+  # Product Mutations
+  createProduct(name: String!, price: Float!, stock: Int!): Product!
+  updateProduct(id: ID!, name: String, price: Float, stock: Int): Product!
+  deleteProduct(id: ID!): Boolean!
+}
