@@ -97,8 +97,11 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 	return user, nil
 }
 
-func (r *queryResolver) GetAllProducts(ctx context.Context) ([]*model.Product, error) {
-	return db.GetAllProducts()
+func (r *queryResolver) GetAllProducts(ctx context.Context, search string) ([]*model.Product, error) {
+	return db.GetAllProducts(search)
+}
+func (r *queryResolver) GetProduct(ctx context.Context, id string) (*model.Product, error) {
+	return db.GetProductById(id)
 }
 
 func (r *mutationResolver) CreateProduct(ctx context.Context, name string, price float64, stock int32) (*model.Product, error) {

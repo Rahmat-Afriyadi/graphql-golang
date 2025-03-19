@@ -24,7 +24,7 @@ type Query {
   me: User! # Mendapatkan informasi user yang sedang login
   # Product Queries
   getProduct(id: ID!): Product
-  getAllProducts: [Product!]!
+  getAllProducts(search: String!): [Product!]!
 }
 
 type Mutation {

@@ -128,7 +128,6 @@ func (db *DB) DeleteUser(id string) (bool, error) {
 	userCollec := db.client.Database("product_db").Collection("user")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	fmt.Println("kesini gk yaa ", id)
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return false, fmt.Errorf("invalid ID format")
@@ -181,7 +180,6 @@ func (db *DB) DeleteProduct(id string) (bool, error) {
 	productCollec := db.client.Database("product_db").Collection("product")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	fmt.Println("kesini gk yaa ", id)
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return false, fmt.Errorf("invalid ID format")
@@ -216,11 +214,14 @@ func (db *DB) GetUser(email string) *model.User {
 	return &userListing
 }
 
-func (db *DB) GetAllProducts() ([]*model.Product, error) {
+func (db *DB) GetAllProducts(search string) ([]*model.Product, error) {
 	productCollec := db.client.Database("product_db").Collection("product")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	cursor, err := productCollec.Find(ctx, bson.M{})
+
+	filter := bson.M{"name": bson.M{"$regex": search, "$options": "i"}}
+
+	cursor, err := productCollec.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}

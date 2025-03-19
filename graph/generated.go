@@ -70,7 +70,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetAllProducts func(childComplexity int) int
+		GetAllProducts func(childComplexity int, search string) int
 		GetAllUsers    func(childComplexity int) int
 		GetProduct     func(childComplexity int, id string) int
 		GetUser        func(childComplexity int, id string) int
@@ -99,7 +99,7 @@ type QueryResolver interface {
 	GetAllUsers(ctx context.Context) ([]*model.User, error)
 	Me(ctx context.Context) (*model.User, error)
 	GetProduct(ctx context.Context, id string) (*model.Product, error)
-	GetAllProducts(ctx context.Context) ([]*model.Product, error)
+	GetAllProducts(ctx context.Context, search string) ([]*model.Product, error)
 }
 
 type executableSchema struct {
@@ -252,7 +252,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.GetAllProducts(childComplexity), true
+		args, err := ec.field_Query_getAllProducts_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetAllProducts(childComplexity, args["search"].(string)), true
 
 	case "Query.getAllUsers":
 		if e.complexity.Query.GetAllUsers == nil {
@@ -800,6 +805,29 @@ func (ec *executionContext) field_Query___type_argsName(
 ) (string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 	if tmp, ok := rawArgs["name"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getAllProducts_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Query_getAllProducts_argsSearch(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["search"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_getAllProducts_argsSearch(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
+	if tmp, ok := rawArgs["search"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -1900,7 +1928,7 @@ func (ec *executionContext) _Query_getAllProducts(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetAllProducts(rctx)
+		return ec.resolvers.Query().GetAllProducts(rctx, fc.Args["search"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1917,7 +1945,7 @@ func (ec *executionContext) _Query_getAllProducts(ctx context.Context, field gra
 	return ec.marshalNProduct2ᚕᚖproductᚑgolangᚑgraphqlᚋgraphᚋmodelᚐProductᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_getAllProducts(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_getAllProducts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1936,6 +1964,17 @@ func (ec *executionContext) fieldContext_Query_getAllProducts(_ context.Context,
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Product", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getAllProducts_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
