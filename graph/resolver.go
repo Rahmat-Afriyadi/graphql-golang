@@ -16,11 +16,9 @@ import (
 
 type Resolver struct{}
 
-var users = map[string]string{
-	"admin": "password123",
-}
 
-const SecretKey = "your-secret-key"
+var SecretKey string = configs.EnvJWTSecret()
+
 
 var db = configs.Connect()
 

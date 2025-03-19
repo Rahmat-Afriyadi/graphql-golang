@@ -9,7 +9,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-const SecretKey = "your-secret-key"
+
+var SecretKey string = configs.EnvJWTSecret()
 
 var db = configs.Connect()
 
